@@ -1,0 +1,10 @@
+#Directory
+__pycache__/
+ffmpeg/
+build/
+dist/
+.idea/
+
+#File
+*.py[cod]
+*.DS_Store
