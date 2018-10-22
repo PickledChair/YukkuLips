@@ -3,6 +3,7 @@ __pycache__/
 ffmpeg/
 build/
 dist/
+pyinstaller-hooks/
 .idea/
 
 #File
