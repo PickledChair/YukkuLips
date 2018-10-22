@@ -211,12 +211,12 @@ class YKLAppWindow(wx.Frame):
     def show_about_dialog(_event):
         info = ADV.AboutDialogInfo()
         info.SetName("YukkuLips")
-        info.SetVersion("0.0.1")
+        info.SetVersion("0.1.0")
         info.SetDescription(
             "クロマキー合成用キャラ素材動画生成アプリケーション\n\n"       
             "スペシャルサンクス\n"
             "ズーズ氏 (http://www.nicotalk.com/charasozai.html)\n"
-            "きつね氏 (http://seiga.nicovideo.jp/seiga/im4817713)\n\n"
+            "きつね氏 (http://www.nicotalk.com/ktykroom.html)\n\n"
             "YukkuLips Repository: https://github.com/PickledChair/YukkuLips")
         info.SetCopyright("(c) 2018 SuitCase <ubatamamoon@gmail.com>")
         info.SetLicence(__doc__)

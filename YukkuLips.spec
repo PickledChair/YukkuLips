@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['YukkuLips.py'],
-             pathex=['/Users/Yuta/PycharmProjects/YukkuLips'],
+             pathex=['.'],
              binaries=[],
              datas=[("ffmpeg/ffmpeg", "ffmpeg")],
              hiddenimports=[],
@@ -39,7 +39,7 @@ app = BUNDLE(coll,
              icon='AppIcon.icns',
              bundle_identifier=None,
              info_plist={
-                'CFBundleShortVersionString': '0.0.1',
+                'CFBundleShortVersionString': '0.1.0',
                 'NSHumanReadableCopyright': 'Copyright © 2018, SuitCase\nAll rights reserved.',
                 'NSHighResolutionCapable': True
              })
