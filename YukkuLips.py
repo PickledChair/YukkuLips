@@ -217,7 +217,7 @@ class YKLAppWindow(wx.Frame):
             "スペシャルサンクス\n"
             "ズーズ氏 (http://www.nicotalk.com/charasozai.html)\n"
             "きつね氏 (http://seiga.nicovideo.jp/seiga/im4817713)\n\n"
-            "YukkuLips Repository: --")
+            "YukkuLips Repository: https://github.com/PickledChair/YukkuLips")
         info.SetCopyright("(c) 2018 SuitCase <ubatamamoon@gmail.com>")
         info.SetLicence(__doc__)
 
