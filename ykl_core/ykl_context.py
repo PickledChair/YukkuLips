@@ -4,7 +4,7 @@ YukkuLips
 Copyright (c) 2018 SuitCase
 
 This software is released under the MIT License.
-https://opensource.org/licenses/mit-license.php
+https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
 """
 
 from pathlib import Path
