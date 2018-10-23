@@ -140,7 +140,7 @@ Macのセキュリティ設定により、ブラウザでダウンロードし�
 
 ## ライセンス
 
-このプロジェクトのソースコードは[MIT License](https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt)で公開しています。
+このプロジェクトは[MIT License](https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt)で公開しています。
 
 
 
