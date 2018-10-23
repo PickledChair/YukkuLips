@@ -179,9 +179,10 @@ class AVSetPanel(wx.Panel):
         self.GetParent().GetParent().disp_unsaved()
 
     def setting_audio_list(self):
-        for mp3_file in self.context.proj_audio_dir.glob("*.mp3"):
-            if not (mp3_file.parent / (mp3_file.stem + ".wav")).exists():
-                self.context.mp3_to_wav(mp3_file)
+        if Path(self.context.ffmpeg_path).exists():
+            for mp3_file in self.context.proj_audio_dir.glob("*.mp3"):
+                if not (mp3_file.parent / (mp3_file.stem + ".wav")).exists():
+                    self.context.mp3_to_wav(mp3_file)
         sound_files = sorted(sorted(self.context.proj_audio_dir.glob("*.wav"))
                              + sorted(self.context.proj_audio_dir.glob("*.WAV")))
         self.audio_list.ClearAll()
