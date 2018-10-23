@@ -52,11 +52,13 @@ macOS Mojave で開発・動作確認しています（それ以前のバージ�
 
 ### ダウンロード
 
-[https://github.com/PickledChair/YukkuLips/releases](https://github.com/PickledChair/YukkuLips/releases)からzipファイルをダウンロードしてください。
+[https://github.com/PickledChair/YukkuLips/releases](https://github.com/PickledChair/YukkuLips/releases)から"YukkuLips-darwin-x64.zip"をダウンロードしてください。
 
 ### インストール
 
 zipファイルを解凍したフォルダ内にある"YukkuLips.app"を任意のフォルダに移してください（通常はアプリケーションフォルダ）。
+
+Macのセキュリティ設定により、ブラウザでダウンロードしたアプリケーションは初回は左クリックで起動できないので、右クリックメニューから「開く」を選択して起動してください。
 
 ### 動画出力機能について
 
