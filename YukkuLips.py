@@ -211,7 +211,7 @@ class YKLAppWindow(wx.Frame):
     def show_about_dialog(_event):
         info = ADV.AboutDialogInfo()
         info.SetName("YukkuLips")
-        info.SetVersion("0.1.0")
+        info.SetVersion("0.1.1")
         info.SetDescription(
             "クロマキー合成用キャラ素材動画生成アプリケーション\n\n"       
             "スペシャルサンクス\n"
