@@ -14,7 +14,7 @@ import sys
 from copy import copy
 from .chara_sozai import CharaSozai
 from .media_utility.image_tool import combine_images, save_image
-from .media_utility.audio_tool import get_sound_map, join_sound_files
+from .media_utility.audio_tool import get_sound_map, join_sound_files, convert_mp3_to_wav
 from .media_utility.video_tool import save_video, save_silent_video
 from collections import namedtuple
 from .ykl_project import YKLProject
@@ -226,6 +226,8 @@ class YKLContext:
             sound_files = [str(sound_file) for sound_file in sound_files]
 
             total_sound = join_sound_files(*sound_files, interval=self.voice_interval, audio_cache=self.audio_path)
+            if total_sound is None:
+                return
             sound_level_seq = get_sound_map(total_sound, len(mouth_paths))
         else:
             sound_level_seq = []
@@ -319,6 +321,9 @@ class YKLContext:
                     os.remove(str(path))
                 if not self.is_silent_movie:
                     os.remove(str(self.audio_path / "temp.wav"))
+
+    def mp3_to_wav(self, file_path):
+        convert_mp3_to_wav(file_path, self.ffmpeg_path)
 
     def update_context_from_project(self):
         self.proj_name = self.project.contents["Project Name"]

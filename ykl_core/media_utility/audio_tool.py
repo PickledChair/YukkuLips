@@ -10,6 +10,7 @@ https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
 import soundfile as sf
 import numpy as np
 import wx
+import subprocess
 
 
 def get_sound_map(sound_file, imgs_num):
@@ -59,11 +60,25 @@ def join_sound_files(*sound_files, interval=2.0, audio_cache=None):
             progress += 1
             progress_dialog.Update(progress, "音声ファイル連結中...({}/{})".format(progress, len(sound_files)))
         else:
-            total_audio_data = np.vstack([total_audio_data, np.zeros([int(interval*samplerate), 1])])
-            total_audio_data = np.vstack([total_audio_data, data])
-            progress += 1
-            progress_dialog.Update(progress, "音声ファイル連結中...({}/{})".format(progress, len(sound_files)))
+            try:
+                total_audio_data = np.vstack([total_audio_data,
+                                              np.zeros([int(interval*samplerate), total_audio_data.shape[1]])])
+                total_audio_data = np.vstack([total_audio_data, data])
+                progress += 1
+                progress_dialog.Update(progress, "音声ファイル連結中...({}/{})".format(progress, len(sound_files)))
+            except Exception as e:
+                progress_dialog.Close()
+                wx.LogError("YukkuLips error: 音声ファイルの結合に失敗しました\n"
+                            "音声ファイル間でチャンネル数が一致していない可能性があります\n" + str(e))
+                return
     if (total_audio_data is not None) and (audio_cache is not None):
         file_name = str(audio_cache / "temp.wav")
         sf.write(file_name, total_audio_data, samplerate)
         return file_name
+
+
+def convert_mp3_to_wav(file_path, ffmpeg_path):
+    p = subprocess.Popen([ffmpeg_path, "-i", str(file_path),
+                          "-vn", "-ac", "2", "-ar", "44100", "-acodec", "pcm_s16le",
+                          "-f", "wav", str(file_path.parent / file_path.stem) + ".wav"])
+    p.wait()
