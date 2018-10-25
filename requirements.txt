@@ -2,7 +2,7 @@ altgraph==0.16.1
 cffi==1.11.5
 future==0.16.0
 macholib==1.11
-numpy==1.15.2
+numpy==1.15.3
 pefile==2018.8.8
 Pillow==5.3.0
 pycparser==2.19
