@@ -21,7 +21,7 @@ import wx.adv as ADV
 
 
 class YKLAppWindow(wx.Frame):
-    def __init__(self, parent, idx, title, size=(800, 675)):
+    def __init__(self, parent, idx, title, size=(800, 680)):
         super().__init__(parent, idx, title, size=size)
         self.context = YKLContext()
         self.image_disp = None
@@ -49,7 +49,7 @@ class YKLAppWindow(wx.Frame):
         hbox.Add(self.image_disp, proportion=1, flag=wx.EXPAND)
         hbox.Add(self.still_set, proportion=0, flag=wx.EXPAND)
 
-        self.av_set = AVSetPanel(panel, wx.ID_ANY, self.context, size=(800, 155))
+        self.av_set = AVSetPanel(panel, wx.ID_ANY, self.context, size=(800, 160))
 
         vbox.Add(hbox, proportion=1, flag=wx.EXPAND)
         vbox.Add(self.av_set, proportion=0, flag=wx.EXPAND)
@@ -212,7 +212,7 @@ class YKLAppWindow(wx.Frame):
     def show_about_dialog(_event):
         info = ADV.AboutDialogInfo()
         info.SetName("YukkuLips")
-        info.SetVersion("0.1.1")
+        info.SetVersion("0.1.2")
         info.SetDescription(
             "クロマキー合成用キャラ素材動画生成アプリケーション\n\n"       
             "スペシャルサンクス\n"

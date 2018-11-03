@@ -39,7 +39,7 @@ app = BUNDLE(coll,
              icon='AppIcon.icns',
              bundle_identifier=None,
              info_plist={
-                'CFBundleShortVersionString': '0.1.1',
+                'CFBundleShortVersionString': '0.1.2',
                 'NSHumanReadableCopyright': 'Copyright © 2018, SuitCase\nAll rights reserved.',
                 'NSHighResolutionCapable': True
              })
