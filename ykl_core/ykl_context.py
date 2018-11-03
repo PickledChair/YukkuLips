@@ -62,6 +62,7 @@ class YKLContext:
         self.blink_interval = 5.0
         self.blink_types = ("定期往復型", "登場退場型")
         self.blink_type = self.blink_types[0]
+        self.mouth_threshold = 1.0
         self.movie_sizes = (MovieSize(name="720p", size_tuple=(1280, 720)),
                             MovieSize(name="1080p", size_tuple=(1920, 1080)))
         self.movie_size = self.movie_sizes[0]
@@ -228,7 +229,7 @@ class YKLContext:
             total_sound = join_sound_files(*sound_files, interval=self.voice_interval, audio_cache=self.audio_path)
             if total_sound is None:
                 return
-            sound_level_seq = get_sound_map(total_sound, len(mouth_paths))
+            sound_level_seq = get_sound_map(total_sound, len(mouth_paths), threshold_ratio=self.mouth_threshold)
         else:
             sound_level_seq = []
             if self.silent_interval > 2:
@@ -357,6 +358,7 @@ class YKLContext:
         self.voice_interval = self.project.contents["Voice Interval"]
         self.blink_interval = self.project.contents["Blink Interval"]
         self.blink_type = self.blink_types[self.project.contents["Blink Type"]]
+        self.mouth_threshold = self.project.contents["Mouth Threshold"]
         self.movie_size = self.movie_sizes[
             [movie_size.name for movie_size in self.movie_sizes].index(self.project.contents["Movie Size"])]
         self.sozai_pos = (self.project.contents["Sozai Position"]["x"], self.project.contents["Sozai Position"]["y"])

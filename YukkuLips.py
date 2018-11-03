@@ -21,7 +21,7 @@ import wx.adv as ADV
 
 
 class YKLAppWindow(wx.Frame):
-    def __init__(self, parent, idx, title, size=(800, 670)):
+    def __init__(self, parent, idx, title, size=(800, 675)):
         super().__init__(parent, idx, title, size=size)
         self.context = YKLContext()
         self.image_disp = None
@@ -49,7 +49,7 @@ class YKLAppWindow(wx.Frame):
         hbox.Add(self.image_disp, proportion=1, flag=wx.EXPAND)
         hbox.Add(self.still_set, proportion=0, flag=wx.EXPAND)
 
-        self.av_set = AVSetPanel(panel, wx.ID_ANY, self.context, size=(800, 150))
+        self.av_set = AVSetPanel(panel, wx.ID_ANY, self.context, size=(800, 155))
 
         vbox.Add(hbox, proportion=1, flag=wx.EXPAND)
         vbox.Add(self.av_set, proportion=0, flag=wx.EXPAND)
@@ -165,6 +165,7 @@ class YKLAppWindow(wx.Frame):
         builder.set_voice_interval(self.context.voice_interval)
         builder.set_blink_interval(self.context.blink_interval)
         builder.set_blink_type(list(self.context.blink_types).index(self.context.blink_type))
+        builder.set_mouth_threshold(self.context.mouth_threshold)
         builder.set_movie_size(self.context.movie_size)
         builder.set_sozai_pos(self.context.sozai_pos)
         builder.set_sozai_scale(self.context.sozai_scale)
@@ -183,7 +184,7 @@ class YKLAppWindow(wx.Frame):
             pathname = fileDialog.GetPath()
         project_backup = copy(self.context.project)
         if not self.context.project.open(pathname):
-            wx.MessageBox("サポートされていないプロジェクトバージョンです", "エラー", wx.ICON_QUESTION | wx.OK, None)
+            wx.MessageBox("現在サポートされていないプロジェクトバージョンです", "エラー", wx.ICON_QUESTION | wx.OK, None)
             return
         paths = [Path(self.context.project.contents["Sozai Directory"]),
                  Path(self.context.project.contents["Audio Directory"])]

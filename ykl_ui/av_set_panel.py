@@ -23,6 +23,7 @@ class AVSetPanel(wx.Panel):
         self.interval_spin = None
         self.blink_choice = None
         self.blink_spin = None
+        self.threshold_spin = None
         self.proj_name_text = None
         self.create_widgets()
 
@@ -84,10 +85,20 @@ class AVSetPanel(wx.Panel):
         blink_box.Add(blink_title, flag=wx.LEFT, border=20)
         blink_box.Add(self.blink_spin)
         blink_box.Add(blink_lbl)
+        threshold_box = wx.BoxSizer(wx.HORIZONTAL)
+        threshold_lbl = wx.StaticText(self, wx.ID_ANY, label="口パクのしきい値：")
+        self.threshold_spin = wx.SpinCtrlDouble(self, wx.ID_ANY, size=(50, 20))
+        self.threshold_spin.SetValue(self.context.mouth_threshold)
+        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.update_spin_ctrl, id=self.threshold_spin.GetId())
+        bai_lbl = wx.StaticText(self, wx.ID_ANY, label="倍")
+        threshold_box.Add(threshold_lbl, flag=wx.LEFT, border=20)
+        threshold_box.Add(self.threshold_spin)
+        threshold_box.Add(bai_lbl)
 
         setting_box.Add(anime_set_lbl, flag=wx.ALL, border=5)
         setting_box.Add(blink_type_box, flag=wx.BOTTOM, border=5)
-        setting_box.Add(blink_box)
+        setting_box.Add(blink_box, flag=wx.BOTTOM, border=5)
+        setting_box.Add(threshold_box)
 
         project_box = wx.BoxSizer(wx.VERTICAL)
 
@@ -148,6 +159,8 @@ class AVSetPanel(wx.Panel):
             self.context.blink_interval = event.GetValue()
         elif event.GetId() == self.silent_second.GetId():
             self.context.silent_interval = event.GetValue()
+        elif event.GetId() == self.threshold_spin.GetId():
+            self.context.mouth_threshold = event.GetValue()
         self.GetParent().GetParent().disp_unsaved()
 
     def setting_audio_from_context(self):
@@ -164,6 +177,7 @@ class AVSetPanel(wx.Panel):
     def setting_anime_from_context(self):
         self.blink_choice.SetSelection(self.context.blink_types.index(self.context.blink_type))
         self.blink_spin.SetValue(self.context.blink_interval)
+        self.threshold_spin.SetValue(self.context.mouth_threshold)
 
     def select_blink_type(self, event):
         self.context.blink_type = self.context.blink_types[event.GetSelection()]

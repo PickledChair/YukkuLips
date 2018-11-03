@@ -55,6 +55,9 @@ class YKLProjectBuilder:
     def set_blink_type(self, blink_type):
         self.project.contents["Blink Type"] = blink_type
 
+    def set_mouth_threshold(self, mouth_threshold):
+        self.project.contents["Mouth Threshold"] = mouth_threshold
+
     def set_movie_size(self, movie_size):
         self.project.contents["Movie Size"] = movie_size.name
 
@@ -79,7 +82,7 @@ class YKLProject:
     def __init__(self):
         image_dic: Dict[str, List[str]] = {}
         self.contents = {
-            "Project Version": 0.1,
+            "Project Version": 0.2,
             "Project Name": "",
             "Sozai Directory": "",
             "Current Images": image_dic,
@@ -92,11 +95,13 @@ class YKLProject:
             "Voice Interval": 0.8,
             "Blink Interval": 15.0,
             "Blink Type": 0,
+            "Mouth Threshold": 1.0,
             "Movie Size": "720p",
             "Sozai Position": {"x": 0, "y": 0},
             "Sozai Scale": 1.0,
             "BG Reference": None,
         }
+        self.supported_proj_version = (0.2, )
         self.location = str(Path.home())
 
     def save_as(self, file_path):
@@ -111,7 +116,7 @@ class YKLProject:
     def open(self, file_path):
         with open(file_path, 'r') as f:
             self.contents = json.load(f)
-        if self.contents["Project Version"] != 0.1:
+        if self.contents["Project Version"] not in self.supported_proj_version:
             return False
         self.location = file_path
         return True
