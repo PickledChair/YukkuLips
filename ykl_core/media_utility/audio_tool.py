@@ -13,11 +13,11 @@ import wx
 import subprocess
 
 
-def get_sound_map(sound_file, imgs_num):
+def get_sound_map(sound_file, imgs_num, threshold_ratio=1.0):
     data, fs = sf.read(sound_file, always_2d=True)
     data = [d[0] ** 2 for d in data]
     buf = []
-    thresholds = [(1 / imgs_num * (i + 1)) ** 2 / 2 for i in range(imgs_num)]
+    thresholds = [(1 / imgs_num * (i + 1)) ** 2 / 2 * threshold_ratio for i in range(imgs_num)]
     work_num = int(len(data)/1470)
     progress_dialog = wx.ProgressDialog(
         title="動画出力",
