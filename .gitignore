@@ -9,3 +9,17 @@ pyinstaller-hooks/
 #File
 *.py[cod]
 *.DS_Store
+
+### VirtualEnv ###
+.Python
+[Bb]in
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+venv
+pip-selfcheck.json
+
+# End of Virtualenv
+ 
