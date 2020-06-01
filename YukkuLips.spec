@@ -6,7 +6,10 @@ block_cipher = None
 a = Analysis(['YukkuLips.py'],
              pathex=['.'],
              binaries=[],
-             datas=[("ffmpeg/ffmpeg", "ffmpeg")],
+             datas=[("ffmpeg/ffmpeg", "ffmpeg"),
+                    ("ykl_app_setting/app_setting.json", "setting"),
+                    ("images/icon.png", "images"),
+                    ],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -39,7 +42,8 @@ app = BUNDLE(coll,
              icon='AppIcon.icns',
              bundle_identifier=None,
              info_plist={
-                'CFBundleShortVersionString': '0.1.2',
-                'NSHumanReadableCopyright': 'Copyright © 2018, SuitCase\nAll rights reserved.',
-                'NSHighResolutionCapable': True
+                'CFBundleShortVersionString': '0.2.0',
+                'NSHumanReadableCopyright': 'Copyright © 2018 - 2020, SuitCase\nAll rights reserved.',
+                'NSHighResolutionCapable': 'True',
+                'NSRequiresAquaSystemAppearance': 'No',
              })

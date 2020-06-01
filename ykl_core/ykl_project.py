@@ -1,122 +1,89 @@
 """
-YukkuLips
+yukkulips
 
-Copyright (c) 2018 SuitCase
+copyright (c) 2018 - 2020 suitcase
 
-This software is released under the MIT License.
-https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
+this software is released under the mit license.
+https://github.com/pickledchair/yukkulips/blob/master/license.txt
 """
 
-import json
-from typing import Dict, List
 from pathlib import Path
-
-
-class YKLProjectBuilder:
-    def __init__(self):
-        self.project = YKLProject()
-
-    def set_project_name(self, name):
-        self.project.contents["Project Name"] = name
-
-    def set_sozai_dir(self, directory):
-        self.project.contents["Sozai Directory"] = directory
-
-    def set_current_images(self, current_images):
-        for k, v in current_images.items():
-            self.project.contents["Current Images"][k] = [str(path) for path in v]
-
-    def set_bg_color(self, bg_color):
-        for i, k in enumerate(self.project.contents["Background Color"]):
-            self.project.contents["Background Color"][k] = bg_color.color_tuple[i]
-
-    def set_mirror_flag(self, flag):
-        self.project.contents["Mirror Image"] = flag
-
-    def set_base_size(self, base_size):
-        self.project.contents["Base Image Size"]["width"] = base_size[0]
-        self.project.contents["Base Image Size"]["height"] = base_size[1]
-
-    def set_audio_dir(self, audio_dir):
-        self.project.contents["Audio Directory"] = audio_dir
-
-    def set_is_silent(self, silent_flag):
-        self.project.contents["Is Silent Movie"] = silent_flag
-
-    def set_silent_interval(self, silent_interval):
-        self.project.contents["Silent Interval"] = silent_interval
-
-    def set_voice_interval(self, voice_interval):
-        self.project.contents["Voice Interval"] = voice_interval
-
-    def set_blink_interval(self, blink_interval):
-        self.project.contents["Blink Interval"] = blink_interval
-
-    def set_blink_type(self, blink_type):
-        self.project.contents["Blink Type"] = blink_type
-
-    def set_mouth_threshold(self, mouth_threshold):
-        self.project.contents["Mouth Threshold"] = mouth_threshold
-
-    def set_movie_size(self, movie_size):
-        self.project.contents["Movie Size"] = movie_size.name
-
-    def set_sozai_pos(self, sozai_pos):
-        self.project.contents["Sozai Position"]["x"] = sozai_pos[0]
-        self.project.contents["Sozai Position"]["y"] = sozai_pos[1]
-
-    def set_sozai_scale(self, sozai_scale):
-        self.project.contents["Sozai Scale"] = sozai_scale
-
-    def set_bg_ref(self, bg_ref):
-        if bg_ref is None:
-            self.project.contents["BG Reference"] = bg_ref
-        else:
-            self.project.contents["BG Reference"] = str(bg_ref)
-
-    def build(self):
-        return self.project
-
+import json
 
 class YKLProject:
-    def __init__(self):
-        image_dic: Dict[str, List[str]] = {}
-        self.contents = {
-            "Project Version": 0.2,
-            "Project Name": "",
-            "Sozai Directory": "",
-            "Current Images": image_dic,
-            "Background Color": {"R": 0, "G": 0, "B": 255, "A": 255},
-            "Mirror Image": False,
-            "Base Image Size": {"width": 400, "height": 400},
-            "Audio Directory": "",
-            "Is Silent Movie": False,
-            "Silent Interval": 0.0,
-            "Voice Interval": 0.8,
-            "Blink Interval": 15.0,
-            "Blink Type": 0,
-            "Mouth Threshold": 1.0,
-            "Movie Size": "720p",
-            "Sozai Position": {"x": 0, "y": 0},
-            "Sozai Scale": 1.0,
-            "BG Reference": None,
-        }
-        self.supported_proj_version = (0.2, )
-        self.location = str(Path.home())
+    def __init__(self, root_path):
+        self.__root = Path(root_path)
+        if not self.__root.exists():
+            self.__root.mkdir()
+        self.__resolution = (1920, 1080)
+        self.__bg_color = (0, 0, 225, 225)
+        self.__content = YKLProject.__initial_content(self.__resolution, self.__bg_color)
+        self.__is_saved = True
 
-    def save_as(self, file_path):
-        with open(file_path, 'w') as f:
-            json.dump(self.contents, f, indent=4, ensure_ascii=False)
-        self.location = file_path
+    def root_path(self):
+        return self.__root
+
+    @staticmethod
+    def __initial_content(resolution, bg_color):
+        content = {
+            "Project Version": 0.3,
+            'SceneBlock List': [],
+            'CharaSozai Resource Dict': {},
+            'Resolution': list(resolution),
+            'BG Color': list(bg_color),
+        }
+        return content
+
+    def open(self):
+        with (self.root_path() / "project.json").open('r') as f:
+            content = json.load(f)
+        self.__content = content
+        sceneblock_list = content["SceneBlock List"]
+        sozai_resource_dic = content["CharaSozai Resource Dict"]
+        sozai_resource_dic = {k: Path(v) for k, v in sozai_resource_dic.items()}
+        self.__resolution = tuple(content["Resolution"])
+        self.__bg_color = tuple(content["BG Color"])
+        self.__is_saved = True
+        return sceneblock_list, sozai_resource_dic
+
+    def is_saved(self):
+        return self.__is_saved
+
+    def set_unsaved(self):
+        self.__is_saved = False
+
+    def get_name(self):
+        return self.__root.name
+
+    def set_sceneblock_list(self, l):
+        self.__content['SceneBlock List'] = l
+
+    def set_resource_path_dic(self, d):
+        d = {k: str(v) for k, v in d.items()}
+        self.__content['CharaSozai Resource Dict'] = d
+
+    @property
+    def resolution(self):
+        return self.__resolution
+
+    @resolution.setter
+    def resolution(self, res):
+        self.__resolution = res
+        self.__content['Resolution'] = list(res)
+        self.__is_saved = False
+
+    @property
+    def bg_color(self):
+        return self.__bg_color
+
+    @bg_color.setter
+    def bg_color(self, bg_color):
+        self.__bg_color = bg_color
+        self.__content['BG Color'] = list(bg_color)
+        self.__is_saved
 
     def save(self):
-        with open(self.location, 'w') as f:
-            json.dump(self.contents, f, indent=4, ensure_ascii=False)
-
-    def open(self, file_path):
-        with open(file_path, 'r') as f:
-            self.contents = json.load(f)
-        if self.contents["Project Version"] not in self.supported_proj_version:
-            return False
-        self.location = file_path
-        return True
+        proj_file_path = self.__root / 'project.json'
+        with proj_file_path.open('w') as f:
+            json.dump(self.__content, f, indent=4, ensure_ascii=False)
+        self.__is_saved = True

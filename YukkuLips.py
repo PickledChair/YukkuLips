@@ -1,232 +1,285 @@
 """
 YukkuLips
 
-Copyright (c) 2018 SuitCase
+Copyright (c) 2018 - 2020 SuitCase
 
 This software is released under the MIT License.
 https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
 """
 
-import wx
-import os
-import sys
+from copy import deepcopy
 from pathlib import Path
-from copy import copy
-from ykl_core.ykl_context import YKLContext
-from ykl_ui.still_image_set_panel import StillImageSetPanel
-from ykl_ui.image_disp_panel import ImageDispPanel
-from ykl_ui.av_set_panel import AVSetPanel
-from ykl_core.ykl_project import YKLProjectBuilder
+import sys
+
+import wx
 import wx.adv as ADV
+
+from ykl_core.ykl_context import YKLContext
+
+from ykl_ui.layout_panel import YKLLayoutPanel, EVT_YKL_LAYOUT_UPDATE
+from ykl_ui.sozai_panel import YKLSozaiPanel, EVT_YKL_SOZAI_UPDATE
+from ykl_ui.scenario_panel import YKLScenarioPanel, EVT_YKL_SCENARIO_UPDATE
+from ykl_ui.welcome_dialog import YKLWelcomeDialog
+from ykl_ui.create_pro_dialog import YKLCreateProjectDialog
+from ykl_ui.project_edit_dialog import YKLProjectEditDialog
+from ykl_ui.script_edit_dialog import YKLScriptEditDialog
+from ykl_ui.import_audio_dialog import YKLImportAudioDialog
+
+
+VERSION = "0.2.0"
 
 
 class YKLAppWindow(wx.Frame):
-    def __init__(self, parent, idx, title, size=(800, 680)):
+    def __init__(self, parent, idx, title,  size=(1000, 680)):
         super().__init__(parent, idx, title, size=size)
-        self.context = YKLContext()
-        self.image_disp = None
-        self.still_set = None
-        self.av_set = None
+        self.ctx = None
+        self.ctx_created = False
+
         self.create_widgets()
-        self.SetTitle("YukkuLips: " + self.context.proj_name + "*")
         self.create_menu()
-        self.Bind(wx.EVT_CLOSE, self.on_close)
 
         self.Centre()
         self.Show()
 
+        self.img_dir = Path.cwd() / 'images'
+        if getattr(sys, 'frozen', False):
+            # frozen は PyInstaller でこのスクリプトが固められた時に sys に追加される属性
+            # frozen が見つからない時は素の Python で実行している時なので False を返す
+            bundle_dir = sys._MEIPASS
+            self.img_dir = Path(bundle_dir) / "images"
+
+        previous = wx.NewIdRef()
+        # history = wx.NewIdRef()
+        new_pro = wx.NewIdRef()
+
+        with YKLWelcomeDialog(self, [previous, new_pro], self.img_dir) as w_dialog:
+            ret_id = w_dialog.ShowModal()
+            if ret_id == previous:
+                with wx.DirDialog(self, 'プロジェクトフォルダを選択') as dir_dialog:
+                    if dir_dialog.ShowModal() == wx.ID_CANCEL:
+                        self.Close()
+                        return
+                    path = dir_dialog.GetPath()
+                    if not (Path(path) / "project.json").exists():
+                        wx.MessageBox("指定フォルダ内にproject.jsonがありません\n"
+                                      "YukkuLipsを終了します", "確認",
+                                      wx.ICON_EXCLAMATION | wx.OK)
+                        self.Close()
+            # elif ret_id == history:
+            #     print('history')
+            elif ret_id == new_pro:
+                with YKLCreateProjectDialog(self) as create_dialog:
+                    if create_dialog.ShowModal() == wx.ID_CANCEL:
+                        self.Close()
+                        return
+                    path = create_dialog.get_path()
+            else:
+                self.Close()
+                return
+
+        self.ctx = YKLContext(path)
+        self.ctx_created = True
+        self.scenario_panel.set_context(self.ctx)
+        self.sozai_panel.set_context(self.ctx)
+        self.layout_panel.set_context(self.ctx)
+        self.update_title()
+
+        # self.create_widgets()
+        # self.create_menu()
+        if (Path(path) / "project.json").exists():
+            self.ctx.open_project()
+            self.update_ui()
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(EVT_YKL_LAYOUT_UPDATE, self.OnUpdate)
+        self.Bind(EVT_YKL_SOZAI_UPDATE, self.OnUpdate)
+        self.Bind(EVT_YKL_SCENARIO_UPDATE, self.OnUpdate)
+
+        # self.Show()
+
     def create_widgets(self):
-        panel = wx.Panel(self, wx.ID_ANY)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        panel.SetSizer(vbox)
+        self.total_rect = wx.SplitterWindow(self, wx.ID_ANY, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
+        self.total_rect.SetMinimumPaneSize(100)
 
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.upper_rect = wx.SplitterWindow(self.total_rect, wx.ID_ANY, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
+        self.upper_rect.SetMinimumPaneSize(100)
 
-        self.image_disp = ImageDispPanel(panel, wx.ID_ANY, self.context, size=(500, 520))
-        self.still_set = StillImageSetPanel(panel, wx.ID_ANY, self.context, size=(300, 520))
+        self.layout_panel = YKLLayoutPanel(self.upper_rect, wx.ID_ANY, self.ctx)
+        self.sozai_panel = YKLSozaiPanel(self.upper_rect, wx.ID_ANY, self.ctx)
 
-        # proportionは、0がサイズ変更不可、1が変更可能（伸縮自在）を意味する
-        hbox.Add(self.image_disp, proportion=1, flag=wx.EXPAND)
-        hbox.Add(self.still_set, proportion=0, flag=wx.EXPAND)
+        self.upper_rect.SplitVertically(self.layout_panel, self.sozai_panel, sashPosition=700)
 
-        self.av_set = AVSetPanel(panel, wx.ID_ANY, self.context, size=(800, 160))
+        self.scenario_panel = YKLScenarioPanel(self.total_rect, wx.ID_ANY, self.ctx)
 
-        vbox.Add(hbox, proportion=1, flag=wx.EXPAND)
-        vbox.Add(self.av_set, proportion=0, flag=wx.EXPAND)
-
-        hbox.Layout()
-        vbox.Layout()
+        self.total_rect.SplitHorizontally(self.upper_rect, self.scenario_panel, sashPosition=380)
 
     def create_menu(self):
         menubar = wx.MenuBar()
-        file = wx.Menu()
+        file_ = wx.Menu()
 
-        open_item = wx.MenuItem(file, wx.ID_OPEN, "プロジェクトを開く\tCtrl+O")
-        self.Bind(wx.EVT_MENU, self.on_open, id=open_item.GetId())
-        file.Append(open_item)
+        new_item = wx.MenuItem(file_, wx.ID_NEW, "プロジェクトを新規作成\tCtrl+N")
+        self.Bind(wx.EVT_MENU, self.OnNewProject, id=new_item.GetId())
+        file_.Append(new_item)
 
-        file.AppendSeparator()
+        open_item = wx.MenuItem(file_, wx.ID_OPEN, "プロジェクトを開く\tCtrl+O")
+        self.Bind(wx.EVT_MENU, self.OnOpen, id=open_item.GetId())
+        file_.Append(open_item)
 
-        save = wx.MenuItem(file, wx.ID_SAVE, "プロジェクトを上書き保存\tCtrl+S")
-        self.Bind(wx.EVT_MENU, self.on_save, id=save.GetId())
-        file.Append(save)
+        file_.AppendSeparator()
 
-        save_as = wx.MenuItem(file, wx.ID_SAVEAS, "プロジェクトに名前を付けて保存\tShift+Ctrl+S")
-        self.Bind(wx.EVT_MENU, self.on_save_as, id=save_as.GetId())
-        file.Append(save_as)
+        pro_set = wx.MenuItem(file_, wx.ID_ANY, "プロジェクト設定\tCtrl+P")
+        self.Bind(wx.EVT_MENU, self.OnProjectSetting, id=pro_set.GetId())
+        file_.Append(pro_set)
 
-        about = wx.MenuItem(file, wx.ID_ABOUT, "&YukkuLipsについて")
-        self.Bind(wx.EVT_MENU, self.show_about_dialog, id=about.GetId())
-        file.Append(about)
+        file_.AppendSeparator()
 
-        close = wx.MenuItem(file, wx.ID_EXIT, "&YukkuLipsを終了")
-        self.Bind(wx.EVT_MENU, self.on_close, id=close.GetId())
-        file.Append(close)
+        save = wx.MenuItem(file_, wx.ID_SAVE, "プロジェクトを保存\tCtrl+S")
+        self.Bind(wx.EVT_MENU, self.OnSave, id=save.GetId())
+        file_.Append(save)
 
-        menubar.Append(file, "&ファイル")
+        file_.AppendSeparator()
+
+        self.audio_imp = wx.MenuItem(file_, wx.ID_ANY, "音声ファイルパスをインポート\tCtrl+I")
+        self.audio_imp.Enable(False)
+        self.Bind(wx.EVT_MENU, self.OnImportAudio, id=self.audio_imp.GetId())
+        file_.Append(self.audio_imp)
+
+        about = wx.MenuItem(file_, wx.ID_ABOUT, "&YukkuLipsについて")
+        self.Bind(wx.EVT_MENU, self.ShowAboutDialog, id=about.GetId())
+        file_.Append(about)
+
+        close = wx.MenuItem(file_, wx.ID_EXIT, "&YukkuLipsを終了")
+        self.Bind(wx.EVT_MENU, self.OnMenuClose, id=close.GetId())
+        file_.Append(close)
+
+        edit = wx.Menu()
+
+        self.scenario = wx.MenuItem(edit, wx.ID_ANY, "シナリオ編集\tCtrl+D")
+        self.scenario.Enable(False)
+        self.Bind(wx.EVT_MENU, self.OnScenarioEdit, id=self.scenario.GetId())
+        edit.Append(self.scenario)
+
+        menubar.Append(file_, "&ファイル")
+        menubar.Append(edit, "&編集")
         self.SetMenuBar(menubar)
 
-    def update_image_disp(self):
-        if (self.context.ui_image_path / "ui_image.png").exists():
-            os.remove(self.context.ui_image_path / "ui_image.png")
-        image = self.context.integrate_images(self.context.base_size)
-        self.context.save_ui_image(image)
-        self.image_disp.update_panel()
-        self.Refresh()
+    def OnProjectSetting(self, event):
+        with YKLProjectEditDialog(self, self.ctx) as e_dialog:
+            ret = e_dialog.ShowModal()
+            if not (ret == wx.ID_CANCEL or ret == wx.ID_CLOSE):
+                # scene_imageの更新はcontextのsetterによって行われている
+                self.update_ui()
 
-    def on_close(self, _event):
-        if not self.context.save_flag:
-            if wx.MessageBox("プロジェクトが保存されていません。終了しますか？",
+    def OnScenarioEdit(self, event):
+        with YKLScriptEditDialog(self, self.ctx) as e_dialog:
+            # ret = e_dialog.ShowModal()
+            # if not (ret == wx.ID_CANCEL or ret == wx.ID_CLOSE):
+            e_dialog.ShowModal()
+            # scene_imageの更新はcontextのsetterによって行われている
+            self.update_ui()
+
+    def OnImportAudio(self, event):
+        with YKLImportAudioDialog(self, self.ctx) as e_dialog:
+            e_dialog.ShowModal()
+            self.update_ui()
+
+    def OnClose(self, event):
+        if self.close_cancel():
+            return
+        self.Destroy()
+        event.Skip()
+
+    def OnMenuClose(self, event):
+        self.Close()
+
+    def close_cancel(self):
+        if self.ctx_created:
+            if not self.ctx.project_saved():
+                if wx.MessageBox("プロジェクトが保存されていません。終了しますか？",
+                             "確認", wx.ICON_QUESTION | wx.YES_NO,
+                             self) == wx.NO:
+                    return True
+        return False
+
+    def OnOpen(self, event):
+        if not self.ctx.project_saved():
+            if wx.MessageBox("保存していない内容は失われます。続行しますか？",
+                            "確認", wx.ICON_QUESTION | wx.YES_NO,
+                            self) == wx.NO:
+                return
+        with wx.DirDialog(self, 'プロジェクトフォルダを選択') as dir_dialog:
+            if dir_dialog.ShowModal() == wx.ID_CANCEL:
+                self.Close()
+            path = dir_dialog.GetPath()
+            if not (Path(path) / "project.json").exists():
+                wx.MessageBox("指定フォルダ内にproject.jsonがありません",
+                              "確認", wx.ICON_EXCLAMATION | wx.OK)
+                return
+        self.ctx = YKLContext(path)
+        self.ctx.open_project()
+        # 各UIパネルに関連づけられているコンテキストオブジェクトを更新
+        self.scenario_panel.set_context(self.ctx)
+        self.sozai_panel.set_context(self.ctx)
+        self.layout_panel.set_context(self.ctx)
+        self.update_ui()
+
+    def OnNewProject(self, event):
+        if not self.ctx.project_saved():
+            if wx.MessageBox("保存していない内容は失われます。続行しますか？",
                              "確認", wx.ICON_QUESTION | wx.YES_NO,
                              self) == wx.NO:
                 return
-        self.clear_cache()
-        self.Destroy()
-
-    def on_open(self, _event):
-        self.open_project()
-
-    def on_save(self, _event):
-        self.save()
-
-    def on_save_as(self, _event):
-        self.save_as()
-
-    def clear_cache(self):
-        if (self.context.ui_image_path / "ui_image.png").exists():
-            os.remove(self.context.ui_image_path / "ui_image.png")
-        while (self.context.ui_image_path / "ui_image.png").exists():
-            continue
-        self.context.animation_image_path.rmdir()
-        self.context.audio_path.rmdir()
-        parent_dir = self.context.ui_image_path.parent
-        self.context.ui_image_path.rmdir()
-        # 子ディレクトリの削除が間に合わなかったのか、yukkulips_cacheディレクトリの削除に失敗することがあるので、
-        # 一応待機のためのループを設置した
-        while self.context.ui_image_path.exists() and self.context.animation_image_path.exists()\
-                and self.context.audio_path.exists():
-            continue
-        parent_dir.rmdir()
-
-    def save_as(self):
-        with wx.FileDialog(
-                self, "プロジェクトを保存", "", self.context.proj_name,
-                wildcard="JSON files (*.json)|*.json", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
-        ) as fileDialog:
-            if fileDialog.ShowModal() == wx.ID_CANCEL:
+        with YKLCreateProjectDialog(self) as create_dialog:
+            if create_dialog.ShowModal() == wx.ID_CANCEL:
                 return
-            pathname = fileDialog.GetPath()
-        self.build_project()
-        self.context.project.save_as(pathname)
-        self.context.save_flag = True
-        self.SetTitle("YukkuLips: " + self.context.proj_name)
+            path = create_dialog.get_path()
+        self.ctx = YKLContext(path)
+        self.scenario_panel.set_context(self.ctx)
+        self.sozai_panel.set_context(self.ctx)
+        self.layout_panel.set_context(self.ctx)
+        self.update_ui()
 
-    def save(self):
-        if self.context.project.contents["Project Name"] == ""\
-                or self.context.project.contents["Project Name"] != self.context.proj_name:
-            self.save_as()
-        else:
-            self.build_project()
-            self.context.project.save()
-            self.context.save_flag = True
-            self.SetTitle("YukkuLips: " + self.context.proj_name)
+    def OnSave(self, event):
+        self.ctx.save_project()
+        self.update_title()
 
-    def build_project(self):
-        builder = YKLProjectBuilder()
-        builder.set_project_name(self.context.proj_name)
-        builder.set_sozai_dir(str(self.context.sozai_dir))
-        builder.set_current_images(self.context.current_images_dic)
-        builder.set_bg_color(self.context.bg_color)
-        builder.set_mirror_flag(self.context.rev_flag)
-        builder.set_base_size(self.context.base_size)
-        builder.set_audio_dir(str(self.context.proj_audio_dir))
-        builder.set_is_silent(self.context.is_silent_movie)
-        builder.set_silent_interval(self.context.silent_interval)
-        builder.set_voice_interval(self.context.voice_interval)
-        builder.set_blink_interval(self.context.blink_interval)
-        builder.set_blink_type(list(self.context.blink_types).index(self.context.blink_type))
-        builder.set_mouth_threshold(self.context.mouth_threshold)
-        builder.set_movie_size(self.context.movie_size)
-        builder.set_sozai_pos(self.context.sozai_pos)
-        builder.set_sozai_scale(self.context.sozai_scale)
-        builder.set_bg_ref(self.context.ref_background)
-        project = builder.build()
-
-        location = self.context.project.location
-        self.context.project = project
-        self.context.project.location = location
-
-    def open_project(self):
-        with wx.FileDialog(self, "プロジェクトを開く", wildcard="JSON files (*.json)|*.json",
-                           style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
-            if fileDialog.ShowModal() == wx.ID_CANCEL:
-                return
-            pathname = fileDialog.GetPath()
-        project_backup = copy(self.context.project)
-        if not self.context.project.open(pathname):
-            wx.MessageBox("現在サポートされていないプロジェクトバージョンです", "エラー", wx.ICON_QUESTION | wx.OK, None)
-            return
-        paths = [Path(self.context.project.contents["Sozai Directory"]),
-                 Path(self.context.project.contents["Audio Directory"])]
-        not_exists = []
-        for path in paths:
-            if not path.exists():
-                not_exists.append(path)
-        if len(not_exists) > 0:
-            not_exists_text = ""
-            for path in not_exists:
-                not_exists_text += str(path) + "\n"
-            wx.MessageBox(not_exists_text + "が見つかりませんでした",
-                          "エラー", wx.ICON_QUESTION | wx.OK, self)
-            self.context.project = project_backup
-            return
-        self.context.update_context_from_project()
-        self.still_set.setting_panel(self.context.sozai.base_dir.name)
-        self.av_set.setting_panel()
-
-        self.update_image_disp()
-        self.context.save_flag = True
-        self.SetTitle("YukkuLips: " + self.context.proj_name)
-
-    @staticmethod
-    def show_about_dialog(_event):
+    def ShowAboutDialog(self, event):
         info = ADV.AboutDialogInfo()
         info.SetName("YukkuLips")
-        info.SetVersion("0.1.2")
+        info.SetVersion(VERSION)
         info.SetDescription(
-            "クロマキー合成用キャラ素材動画生成アプリケーション\n\n"       
+            "クロマキー合成用キャラ素材動画生成アプリケーション\n\n"
             "スペシャルサンクス\n"
             "ズーズ氏 (http://www.nicotalk.com/charasozai.html)\n"
             "きつね氏 (http://www.nicotalk.com/ktykroom.html)\n\n"
             "YukkuLips Repository: https://github.com/PickledChair/YukkuLips")
-        info.SetCopyright("(c) 2018 SuitCase <ubatamamoon@gmail.com>")
+        info.SetCopyright("(c) 2018 - 2020 SuitCase <ubatamamoon@gmail.com>")
         info.SetLicence(__doc__)
 
         ADV.AboutBox(info)
 
-    def disp_unsaved(self):
-        self.SetTitle("YukkuLips: " + self.context.proj_name + "*")
-        self.context.save_flag = False
+    def OnUpdate(self, event):
+        self.update_ui()
+
+    def update_title(self):
+        if not self.ctx.project_saved():
+            self.SetTitle("YukkuLips: " + self.ctx.get_project_name() + " (未保存)")
+        else:
+            self.SetTitle("YukkuLips: " + self.ctx.get_project_name())
+
+    def update_ui(self):
+        if len(self.ctx.get_sceneblocks()) == 0:
+            self.scenario.Enable(False)
+            self.audio_imp.Enable(False)
+        else:
+            self.scenario.Enable(True)
+            self.audio_imp.Enable(True)
+        self.sozai_panel.update_sozai_list()
+        self.scenario_panel.update_sceneblock_list()
+        self.layout_panel.update_layoutpreview()
+        self.update_title()
+        # self.Refresh()
+
 
 
 class YKLApp(wx.App):
