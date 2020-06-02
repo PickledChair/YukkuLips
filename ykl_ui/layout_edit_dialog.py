@@ -9,7 +9,8 @@ https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
 
 import wx
 import wx.lib.newevent as NE
-from media_utility.image_tool import get_rescaled_image, get_thumbnail, get_scene_image
+from media_utility.image_tool import get_rescaled_image, get_thumbnail, get_scene_image, open_img
+from PIL import Image
 
 # from copy import copy
 from pathlib import Path
@@ -314,8 +315,17 @@ class ImageMovePanel(wx.Panel):
 
     def update_background(self, pathname):
         self.sceneblock.bg_path = pathname
-        bg_bmp = wx.Bitmap(str(self.sceneblock.bg_path))
-        bg_bmp.SetSize(size=self.scene_size)
+        img = open_img(str(self.sceneblock.bg_path))
+        img = img.resize(self.scene_size, Image.LANCZOS)
+        # bg_bmp = wx.Bitmap(str(self.sceneblock.bg_path))
+        if len(img.getpixel((0,0))) == 3:
+            bg_bmp = wx.Bitmap.FromBuffer(*img.size, img.tobytes())
+        elif len(img.getpixel((0,0))) == 4:
+            bg_bmp = wx.Bitmap.FromBufferRGBA(*img.size, img.tobytes())
+        else:
+            return
+        # SetSizeは内部でSetWidthなどを呼んでいるようだが、それらは非推奨である
+        # bg_bmp.SetSize(size=self.scene_size)
         bg_obj = ImageObj(bg_bmp, *self.bg_pos)
         self.objs[0] = bg_obj
 
