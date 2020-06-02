@@ -26,7 +26,7 @@ from ykl_ui.script_edit_dialog import YKLScriptEditDialog
 from ykl_ui.import_audio_dialog import YKLImportAudioDialog
 
 
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 
 class YKLAppWindow(wx.Frame):
