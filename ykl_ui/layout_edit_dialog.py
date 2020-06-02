@@ -304,8 +304,17 @@ class ImageMovePanel(wx.Panel):
             bg_obj = ImageObj(bg_bmp, *self.bg_pos)
             self.objs.append(bg_obj)
         else:
-            bg_bmp = wx.Bitmap(str(self.sceneblock.bg_path))
-            bg_bmp.SetSize(size=self.scene_size)
+            img = open_img(str(self.sceneblock.bg_path))
+            img = img.resize(self.scene_size, Image.LANCZOS)
+            # bg_bmp = wx.Bitmap(str(self.sceneblock.bg_path))
+            if len(img.getpixel((0,0))) == 3:
+                bg_bmp = wx.Bitmap.FromBuffer(*img.size, img.tobytes())
+            elif len(img.getpixel((0,0))) == 4:
+                bg_bmp = wx.Bitmap.FromBufferRGBA(*img.size, img.tobytes())
+            else:
+                return
+            # SetSizeは内部でSetWidthなどを呼んでいるようだが、それらは非推奨である
+            # bg_bmp.SetSize(size=self.scene_size)
             bg_obj = ImageObj(bg_bmp, *self.bg_pos)
             self.objs.append(bg_obj)
 
