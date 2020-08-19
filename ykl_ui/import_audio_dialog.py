@@ -66,6 +66,9 @@ class YKLImportAudioDialog(wx.Dialog):
                                 sozai.anime_audio_path = str(paths[idx])
                                 sozai.movie_audio_path = str(paths[idx])
                                 idx += 1
+                            else:
+                                sozai.anime_audio_path = ""
+                                sozai.movie_audio_path = ""
                     if finish:
                         break
         self.ctx.unsaved_check()
