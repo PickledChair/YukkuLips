@@ -63,10 +63,8 @@ class YKLScriptEditDialog(wx.Dialog):
         text = ''.join(self.tctrl.GetValue().split("--\n"))
         with txt_path.open('w') as f:
             f.write(text)
-        try:
-            p = subprocess.Popen(["open", "-a", "MYukkuriVoice", str(txt_path)])
-            p.wait()
-        except OSError:
+        p = subprocess.Popen(["open", "-a", "MYukkuriVoice", str(txt_path)])
+        if p.wait() == 1:
             wx.MessageBox("MYukkuriVoice.appはアプリケーションフォルダ内に"
                           "ある必要があります",
                           "MYukkuriVoiceを開けませんでした",
