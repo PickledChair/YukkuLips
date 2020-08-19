@@ -10,6 +10,7 @@ https://github.com/PickledChair/YukkuLips/blob/master/LICENSE.txt
 from copy import deepcopy
 from pathlib import Path
 import sys
+import webbrowser
 
 import wx
 import wx.adv as ADV
@@ -27,6 +28,8 @@ from ykl_ui.import_audio_dialog import YKLImportAudioDialog
 
 
 VERSION = "0.2.2"
+
+YKL_REPOSITORY_URL = "https://github.com/PickledChair/YukkuLips"
 
 
 class YKLAppWindow(wx.Frame):
@@ -159,9 +162,19 @@ class YKLAppWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnScenarioEdit, id=self.scenario.GetId())
         edit.Append(self.scenario)
 
+        help_ = wx.Menu()
+
+        to_repo = wx.MenuItem(help_, wx.ID_ANY, "YukkuLips Repository を開く")
+        self.Bind(wx.EVT_MENU, self.OnOpenRepoURL, id=to_repo.GetId())
+        help_.Append(to_repo)
+
         menubar.Append(file_, "&ファイル")
         menubar.Append(edit, "&編集")
+        menubar.Append(help_, "&Help")
         self.SetMenuBar(menubar)
+
+    def OnOpenRepoURL(self, event):
+        webbrowser.open(YKL_REPOSITORY_URL)
 
     def OnProjectSetting(self, event):
         with YKLProjectEditDialog(self, self.ctx) as e_dialog:
