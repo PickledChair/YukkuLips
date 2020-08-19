@@ -30,6 +30,7 @@ from ykl_ui.import_audio_dialog import YKLImportAudioDialog
 VERSION = "0.2.2"
 
 YKL_REPOSITORY_URL = "https://github.com/PickledChair/YukkuLips"
+YKL_LIBRARIES_URL  = "https://github.com/PickledChair/YukkuLips/blob/master/LIBRARIES.txt"
 
 
 class YKLAppWindow(wx.Frame):
@@ -168,6 +169,10 @@ class YKLAppWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnOpenRepoURL, id=to_repo.GetId())
         help_.Append(to_repo)
 
+        to_lib = wx.MenuItem(help_, wx.ID_ANY, "使用ライブラリ")
+        self.Bind(wx.EVT_MENU, self.OnOpenLibraries, id=to_lib.GetId())
+        help_.Append(to_lib)
+
         menubar.Append(file_, "&ファイル")
         menubar.Append(edit, "&編集")
         menubar.Append(help_, "&Help")
@@ -175,6 +180,9 @@ class YKLAppWindow(wx.Frame):
 
     def OnOpenRepoURL(self, event):
         webbrowser.open(YKL_REPOSITORY_URL)
+
+    def OnOpenLibraries(self, event):
+        webbrowser.open(YKL_LIBRARIES_URL)
 
     def OnProjectSetting(self, event):
         with YKLProjectEditDialog(self, self.ctx) as e_dialog:
