@@ -168,6 +168,7 @@ class YKLScenarioPanel(wx.Panel):
                 self.copy_btn.Enable()
         else:
             self.remove_btn.SetStatus("Disabled")
+            self.copy_btn.Enable(False)
             self.edit_btn.Enable(False)
             self.save_btn.Enable(False)
 

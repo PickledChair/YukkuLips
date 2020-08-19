@@ -30,6 +30,8 @@ class YKLRollingCopyDialog(wx.Dialog):
         if not self.temp_dir.exists():
             self.temp_dir.mkdir()
 
+        self.Bind(wx.EVT_CLOSE, self.OnClose, id=self.GetId())
+
         box = wx.BoxSizer(wx.VERTICAL)
         self.content_panel = CopyContentPanel(self, wx.ID_ANY, self.get_current_chara(), self.block_idx, self.temp_dir, size=(580, 300))
         box.Add(self.content_panel)
@@ -60,12 +62,20 @@ class YKLRollingCopyDialog(wx.Dialog):
 
         self.SetSizer(box)
 
+        if not self.contents_check():
+            wx.MessageBox("コピーダイアログを終了してください",
+                          "全てのキャラ素材のセリフが空欄です",
+                          wx.ICON_EXCLAMATION | wx.OK)
+            myv_btn.Enable(False)
+            copy_btn.Enable(False)
+            prev_btn.Enable(False)
+            next_btn.Enable(False)
+            return
+
         if self.get_current_chara().speech_content == "":
             self.content_increment()
         else:
             self.save_temp_txt()
-
-        self.Bind(wx.EVT_CLOSE, self.OnClose, id=self.GetId())
 
     def OnCheck(self, event):
         self.ctx.app_setting.setting_dict["CopyDialog Next Check"] = self.next_check.GetValue()
@@ -90,14 +100,19 @@ class YKLRollingCopyDialog(wx.Dialog):
 
     def send_to_myukkurivoice(self):
         txt_path = self.temp_dir / "serifu.txt"
-        try:
-            p = subprocess.Popen(["open", "-a", "MYukkuriVoice", str(txt_path)])
-            p.wait()
-        except OSError:
+        p = subprocess.Popen(["open", "-a", "MYukkuriVoice", str(txt_path)])
+        if p.wait() == 1:
             wx.MessageBox("MYukkuriVoice.appはアプリケーションフォルダ内に"
                           "ある必要があります",
                           "MYukkuriVoiceを開けませんでした",
                           wx.ICON_EXCLAMATION | wx.OK)
+
+    def contents_check(self):
+        for block in self.ctx.get_sceneblocks():
+            for chara in block.get_sozais():
+                if chara.speech_content != "":
+                    return True
+        return False
 
     def OnClose(self, event):
         self.ctx.unsaved_check()
