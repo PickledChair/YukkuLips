@@ -42,7 +42,7 @@ app = BUNDLE(coll,
              icon='AppIcon.icns',
              bundle_identifier=None,
              info_plist={
-                'CFBundleShortVersionString': '0.2.2',
+                'CFBundleShortVersionString': '0.2.3',
                 'NSHumanReadableCopyright': 'Copyright © 2018 - 2020, SuitCase\nAll rights reserved.',
                 'NSHighResolutionCapable': 'True',
                 'NSRequiresAquaSystemAppearance': 'No',
