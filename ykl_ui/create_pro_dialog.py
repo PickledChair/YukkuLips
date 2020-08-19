@@ -23,7 +23,7 @@ class YKLCreateProjectDialog(wx.Dialog):
 
         loc_label = wx.StaticText(self, wx.ID_ANY, '保存場所：')
         flexgrid.Add(loc_label, flag=wx.ALL | wx.ALIGN_CENTRE_VERTICAL, border=5)
-        self.dir_ctrl = wx.DirPickerCtrl(self, wx.ID_ANY)
+        self.dir_ctrl = wx.DirPickerCtrl(self, wx.ID_ANY, message="場所を選択", style=wx.DIRP_SMALL | wx.DIRP_USE_TEXTCTRL)
         flexgrid.Add(self.dir_ctrl, 1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTRE_VERTICAL)
         vbox1.Add(flexgrid, 1, flag=wx.EXPAND | wx.ALL, border=5)
 

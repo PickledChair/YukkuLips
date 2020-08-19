@@ -28,7 +28,7 @@ class YKLImportAudioDialog(wx.Dialog):
         box.Add(chara_box)
 
         place_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.place = wx.DirPickerCtrl(self, wx.ID_ANY)
+        self.place = wx.DirPickerCtrl(self, wx.ID_ANY, message="場所を選択", style=wx.DIRP_SMALL | wx.DIRP_USE_TEXTCTRL)
         place_box.Add(self.place, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=10)
         place_text = wx.StaticText(self, wx.ID_ANY, "内の音声ファイルをインポート")
         place_box.Add(place_text, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=10)
