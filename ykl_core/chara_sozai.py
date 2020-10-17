@@ -66,7 +66,7 @@ class CharaSozai:
         take_times = [0.5 for _ in range(len(parts))]
         hold_frames = [2 for _ in range(len(parts))]
         thresholds = [1.0 for _ in range(len(parts))]
-        line_shapes = ["LINEAR" for _ in range(len(parts))]
+        line_shapes = ["QUADRATIC" for _ in range(len(parts))]
         initial_dict = {
             part: {
                 "Anime Type": anime_type,
