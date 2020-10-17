@@ -27,7 +27,7 @@ from ykl_ui.script_edit_dialog import YKLScriptEditDialog
 from ykl_ui.import_audio_dialog import YKLImportAudioDialog
 
 
-VERSION = "0.2.3"
+VERSION = "0.2.4"
 
 YKL_REPOSITORY_URL = "https://github.com/PickledChair/YukkuLips"
 YKL_LIBRARIES_URL  = "https://github.com/PickledChair/YukkuLips/blob/master/LIBRARIES.txt"
