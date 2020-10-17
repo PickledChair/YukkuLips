@@ -16,7 +16,7 @@ class YKLProject:
         if not self.__root.exists():
             self.__root.mkdir()
         self.__resolution = (1920, 1080)
-        self.__bg_color = (0, 0, 225, 225)
+        self.__bg_color = (0, 0, 255, 255)
         self.__content = YKLProject.__initial_content(self.__resolution, self.__bg_color)
         self.__is_saved = True
 

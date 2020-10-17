@@ -88,8 +88,6 @@ class YKLAppWindow(wx.Frame):
         self.layout_panel.set_context(self.ctx)
         self.update_title()
 
-        # self.create_widgets()
-        # self.create_menu()
         if (Path(path) / "project.json").exists():
             self.ctx.open_project()
             self.update_ui()
@@ -98,8 +96,6 @@ class YKLAppWindow(wx.Frame):
         self.Bind(EVT_YKL_LAYOUT_UPDATE, self.OnUpdate)
         self.Bind(EVT_YKL_SOZAI_UPDATE, self.OnUpdate)
         self.Bind(EVT_YKL_SCENARIO_UPDATE, self.OnUpdate)
-
-        # self.Show()
 
     def create_widgets(self):
         self.total_rect = wx.SplitterWindow(self, wx.ID_ANY, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
