@@ -153,6 +153,7 @@ class YKLScenarioPanel(wx.Panel):
                 self.sceneblock_list.SetItem(i, sozais_num+1, status)
             idx = self.ctx.get_sceneblocks().index(self.ctx.get_current_sceneblock())
             self.sceneblock_list.SetItemBackgroundColour(idx, wx.Colour(135, 206, 250))
+            self.sceneblock_list.Focus(idx)
             if sozais_num == 0:
                 self.remove_btn.SetStatus("Disabled")
                 self.edit_btn.Enable(False)
@@ -174,7 +175,7 @@ class YKLScenarioPanel(wx.Panel):
 
         self.Refresh()
 
-class ScenarioListCtrl(wx.ListCtrl):
+class ScenarioListCtrl(wx.ListView):
     def __init__(self, parent, idx, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=0):
         wx.ListCtrl.__init__(self, parent, idx, pos, size, style)
