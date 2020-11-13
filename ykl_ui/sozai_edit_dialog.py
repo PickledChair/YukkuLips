@@ -158,7 +158,7 @@ class AnimeSeriesPanel(wx.Panel):
         self.__set_parts_dic()
 
         # 初期値の設定
-        current_u = self.sozai.get_current_image_dic()["後"]
+        current_u = self.sozai.get_current_image_dic().get("後")
         if current_u:
             paths_dic = self.sozai.get_parts_path_dic()
             f_serieses = paths_dic["後"]["前側"]

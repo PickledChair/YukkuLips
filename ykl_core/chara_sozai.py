@@ -291,7 +291,7 @@ class CharaSozai:
         return self.__image
 
     def get_anime_image_dict(self, image_elements=False):
-        if self.__current_image_dic['全']:
+        if self.__current_image_dic.get('全'):
             ordered_parts = ['全',]
             if image_elements:
                 anime_image_dict = {0: self.__image,}
