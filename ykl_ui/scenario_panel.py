@@ -152,7 +152,7 @@ class YKLScenarioPanel(wx.Panel):
                 status = "済" if block.movie_generated else "未"
                 self.sceneblock_list.SetItem(i, sozais_num+1, status)
             idx = self.ctx.get_sceneblocks().index(self.ctx.get_current_sceneblock())
-            self.sceneblock_list.SetItemBackgroundColour(idx, wx.Colour(135, 206, 250))
+            self.sceneblock_list.SetItemBackgroundColour(idx, wx.Colour(90, 200, 250))
             self.sceneblock_list.Focus(idx)
             if sozais_num == 0:
                 self.remove_btn.SetStatus("Disabled")
