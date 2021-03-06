@@ -310,6 +310,10 @@ class YKLApp(wx.App):
         return True
 
 
-if __name__ == "__main__":
+def main():
     app = YKLApp()
     app.MainLoop()
+
+
+if __name__ == "__main__":
+    main()
