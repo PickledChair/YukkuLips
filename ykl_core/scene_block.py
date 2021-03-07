@@ -10,7 +10,8 @@ https://github.com/pickledchair/yukkulips/blob/master/license.txt
 import json
 from copy import deepcopy
 import shutil
-from multiprocessing import Manager, Pool
+from multiprocessing import Manager, Pool, freeze_support
+freeze_support()
 
 import wx
 
