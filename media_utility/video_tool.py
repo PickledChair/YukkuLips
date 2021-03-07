@@ -16,13 +16,13 @@ from media_utility.audio_tool import get_sound_map, get_sound_length, gen_void_s
 
 MovieSize = namedtuple("MovieSize", ("name", "size_tuple"))
 
-FFMPEG_PATH = Path.cwd() / "ffmpeg" / "ffmpeg"
+FFMPEG_PATH = Path.cwd() / "FFmpeg" / "ffmpeg"
 
 if getattr(sys, 'frozen', False):
     # frozen は PyInstaller でこのスクリプトが固められた時に sys に追加される属性
     # frozen が見つからない時は素の Python で実行している時なので False を返す
     bundle_dir = sys._MEIPASS
-    FFMPEG_PATH = Path(bundle_dir) / "ffmpeg" / "ffmpeg"
+    FFMPEG_PATH = Path(bundle_dir) / "FFmpeg" / "ffmpeg"
 
 
 def save_video(cache_path, sound_file, save_file_path, ffmpeg_path):

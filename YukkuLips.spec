@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['YukkuLips.py'],
              pathex=['.'],
              binaries=[],
-             datas=[("ffmpeg/ffmpeg", "ffmpeg"),
+             datas=[("FFmpeg/ffmpeg", "FFmpeg"),
                     ("ykl_app_setting/app_setting.json", "setting"),
                     ("images/icon.png", "images"),
                     ],
