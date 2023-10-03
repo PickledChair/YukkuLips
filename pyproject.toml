@@ -8,7 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "3.9"
 numpy = "^1.21.3"
-Pillow = "^9.0.0"
+Pillow = "^10.0.1"
 PySoundFile = "0.9.0.post1"
 wxPython = "4.1.1"
 pyinstaller = "^4.2"
